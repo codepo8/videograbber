@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Taking screengrabs from video in Canvas</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<style>
+  *{margin:0;padding:0;font-size:15px;font-family:calibri,arial,sans-serif}
+  footer,section,header{display:block;}
+  body{padding:2em;background:#666;color:#fff;}
+  h1{font-size:24px;margin:10px 0;}
+  h2{font-size:18px;margin:10px 0;color:lime;}
+  canvas{display:block;border:2px solid #000;}
+  #video,#canvas{float:left;padding-right:10px;}
+  #video{width:640px;}
+  #save li{list-style:none;margin:0;padding:0}
+  #save{clear:both;padding:10px 0;overflow:auto;}
+  #save img{float:left;padding-right:5px;padding-bottom:5px;}
+  footer a{color:lime;}
+  footer p{margin:5em 0 1em 0;padding:1em 0;border-top:1px solid #999}
+</style>
+</head>
+<body>
+  <header><h1>Taking screengrabs from video in Canvas (Chrome, Mozilla, Opera, Safari - maybe IE (got no windows))</h1></header>
+  <section>
+    <p>Simply play the video. Every time you pause, you can see the screenshot on the right. Click the screenshot to store it in your collection below.</p>
+<div id="video">
+  <h2>The Video:</h2>
+  <video controls>
+    <source src="meetthecubs.mp4" type="video/mp4"></source>
+    <source src="meetthecubs.webm" type="video/webm"></source>
+  </video>
+</div>
+<div id="canvas">
+  <h2>Preview (click to store images below):</h2>
+  <canvas></canvas>
+</div>
+<div id="save">
+  <h2>Your saved images:</h2>
+  <ul></ul>
+</div>
+</section>
+<footer>
+  <p>Written by 
+    <a href="http://wait-till-i.com/">Chris Heilmann</a> - 
+    <a href="http://twitter.com/codepo8">@codepo8</a>
+  </p>
+</footer>
+<script>
+
+(function(){
+
+  var v = document.querySelector('video'),
+      n = document.querySelector('source').src.replace(/.*\/|\..*$/g,''),
+      c = document.querySelector('canvas'),
+      save = document.querySelector('#save ul'),
+      ctx = c.getContext('2d');
+
+  v.addEventListener('loadedmetadata',function(ev){
+    
+    var ratio = v.videoWidth/v.videoHeight,
+        w = 400,
+        h = parseInt(w / ratio, 10),
+        time = 0,
+        img = null,
+        li = null;
+
+    c.width = w;
+    c.height = h + 40;
+  
+    v.addEventListener('timeupdate',function(ev){
+      if(v.paused){
+        ctx.fillStyle = 'rgb(0, 0, 0)';
+        ctx.fillRect(0, 0, w, h);
+        ctx.drawImage(v, 0, 40, w, h);
+        ctx.font = '20px Calibri';
+        ctx.fillStyle = 'lime';
+        ctx.fillText(n, 5, 20);
+        time = format(v.currentTime);
+        ctx.fillStyle = 'white';
+        ctx.fillText(time, 395 - ctx.measureText(time).width, 20);
+      }
+    },false);
+
+    c.addEventListener('click',function(ev){
+      li = document.createElement('li');
+      img = document.createElement('img');
+      li.appendChild(img);
+      save.appendChild(li);
+      img.src = ctx.canvas.toDataURL('image/png');
+    },false);
+
+  },false);
+
+  function format(time){
+    var hours = parseInt((time / 60 / 60) % 60, 10),
+        mins = parseInt((time / 60) % 60, 10),
+        secs = parseInt(time, 10) % 60,
+        hourss = (hours < 10 ? '0' : '') + parseInt(hours, 10) + ':',
+        minss = (mins < 10 ? '0' : '') + parseInt(mins, 10) + ':',
+        secss  = (secs < 10 ? '0' : '') +(secs % 60),
+        timestring = ( hourss !== '00:' ? hourss : '' ) + minss + secss;
+    return timestring;
+  };
+})();
+</script>
+</body>
+</html>
